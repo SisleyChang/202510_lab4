@@ -8,8 +8,8 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 # 安裝並更新 libxml2
 RUN apk update && \
-    apk upgrade libxml2 && \
-    apk add --no-cache libxml2-dev
+    apk upgrade libxml2 expat && \
+    apk add --no-cache libxml2-dev expat-dev
 
 # 移除預設的 Nginx 網頁
 RUN rm -rf /usr/share/nginx/html/*
@@ -35,4 +35,6 @@ CMD ["nginx", "-g", "daemon off;"]
 
 # 加入安全配置
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+    chmod -R 755 /usr/share/nginx/html && \
+    # 設定 expat 相關檔案權限
+    chmod 644 /usr/lib/libexpat.so*
