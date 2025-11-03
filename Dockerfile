@@ -1,15 +1,16 @@
-# 使用輕量級的 Nginx Alpine 映像
-FROM nginx:alpine3.18-perl
+# 使用純 nginx alpine 映像，不含 perl
+FROM nginx:alpine3.18
 
 # 維護者資訊
 LABEL org.opencontainers.image.source="https://github.com/YOUR_USERNAME/YOUR_REPO"
 LABEL org.opencontainers.image.description="井字遊戲 - 靜態網頁應用"
 LABEL org.opencontainers.image.licenses="MIT"
 
-# 安裝並更新 libxml2
+# 安裝並更新必要套件，移除 perl 相關套件
 RUN apk update && \
     apk upgrade libxml2 expat && \
-    apk add --no-cache libxml2-dev expat-dev
+    apk add --no-cache libxml2-dev expat-dev && \
+    apk del perl perl-module-runtime
 
 # 移除預設的 Nginx 網頁
 RUN rm -rf /usr/share/nginx/html/*
@@ -33,8 +34,9 @@ EXPOSE 8080
 # 啟動 Nginx
 CMD ["nginx", "-g", "daemon off;"]
 
-# 加入安全配置
+# 加強安全配置
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html && \
-    # 設定 expat 相關檔案權限
-    chmod 644 /usr/lib/libexpat.so*
+    chmod 644 /usr/lib/libexpat.so* && \
+    # 移除不必要的檔案
+    rm -rf /var/cache/apk/* /tmp/*
