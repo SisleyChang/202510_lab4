@@ -34,9 +34,6 @@ RUN sed -i 's/listen\s*80;/listen 8080;/g' /etc/nginx/conf.d/default.conf && \
 # 暴露 8080 端口（非特權端口）
 EXPOSE 8080
 
-# 啟動 Nginx
-CMD ["nginx", "-g", "daemon off;"]
-
 # 加強安全配置
 RUN chown -R appuser:appgroup /usr/share/nginx/html && \
     chown -R appuser:appgroup /var/cache/nginx && \
@@ -54,3 +51,6 @@ RUN chown -R appuser:appgroup /usr/share/nginx/html && \
 
 # 切換到非 root 使用者
 USER appuser
+
+# 啟動 Nginx
+CMD ["nginx", "-g", "daemon off;"]
