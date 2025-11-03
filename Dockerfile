@@ -1,8 +1,8 @@
 # 使用最新的 Alpine 版本以獲得較新的 musl libc (1.2.6+)
 FROM alpine:3.19.1 as builder
 
-# 安裝並更新 musl libc
-RUN apk add --no-cache musl-dev gcc make
+# 安裝最新版本的 musl
+RUN apk add --no-cache musl-dev=~1.2.6 gcc make
 
 # 設定基礎映像
 FROM nginx:alpine3.19.1
@@ -14,7 +14,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 # 安裝並更新必要套件
 RUN apk update && \
-    apk upgrade musl musl-utils && \
+    apk upgrade musl=~1.2.6 musl-utils=~1.2.6 && \
     apk add --no-cache \
         libxml2-dev \
         expat-dev \
@@ -22,6 +22,7 @@ RUN apk update && \
         openssl-dev \
         curl-dev \
         libiconv \
+        icu-dev \
         libiconv-dev && \
     apk del perl perl-module-runtime && \
     # 創建非 root 使用者
@@ -59,8 +60,11 @@ RUN chown -R appuser:appgroup /usr/share/nginx/html && \
     chmod 644 /usr/lib/libcurl.so* && \
     chmod 644 /usr/lib/libiconv.so* && \
     chmod 755 /bin/busybox && \
-    # 設定 iconv 安全配置
+    # 設定安全的字符編碼環境
+    mkdir -p /usr/share/i18n/locales/musl && \
     echo "export MUSL_LOCPATH=/usr/share/i18n/locales/musl" >> /etc/profile.d/locale.sh && \
+    echo "export LC_ALL=en_US.UTF-8" >> /etc/profile.d/locale.sh && \
+    echo "export LANG=en_US.UTF-8" >> /etc/profile.d/locale.sh && \
     touch /var/run/nginx.pid && \
     chown -R appuser:appgroup /var/run/nginx.pid && \
     rm -rf /var/cache/apk/* /tmp/*
