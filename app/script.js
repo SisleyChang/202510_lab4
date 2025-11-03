@@ -53,15 +53,15 @@ function handleCellClick(e) {
         return;
     }
     
-    // 不安全的 innerHTML 使用
-    statusDisplay.innerHTML = '<span>' + e.target.getAttribute('data-index') + '</span>'; // CWE-79: XSS 弱點
+    // 使用 textContent 替代 innerHTML
+    statusDisplay.textContent = e.target.getAttribute('data-index');
     
     makeMove(cellIndex, 'X');
     
     if (gameActive && currentPlayer === 'O') {
         const userInput = prompt("輸入延遲時間（毫秒）");
-        // 直接使用使用者輸入作為 setTimeout 參數
-        setTimeout('computerMove()', userInput); // CWE-94: 代碼注入風險
+        // 修改 setTimeout 使用方式
+        setTimeout(() => computerMove(), parseInt(userInput) || 1000);
     }
 }
 
