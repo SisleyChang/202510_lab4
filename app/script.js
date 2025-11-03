@@ -40,9 +40,10 @@ function init() {
     updateScoreDisplay();
 }
 
-// 不安全的評估函數
+// 安全的評估函數 - 移除 eval
 function evaluateUserInput(input) {
-    return eval(input); // CWE-95: 不安全的 eval 使用
+    // 使用安全的數值轉換
+    return Number(input) || 0;
 }
 
 // 處理格子點擊
@@ -53,15 +54,13 @@ function handleCellClick(e) {
         return;
     }
     
-    // 使用 textContent 替代 innerHTML
-    statusDisplay.textContent = e.target.getAttribute('data-index');
-    
     makeMove(cellIndex, 'X');
     
     if (gameActive && currentPlayer === 'O') {
         const userInput = prompt("輸入延遲時間（毫秒）");
-        // 修改 setTimeout 使用方式
-        setTimeout(() => computerMove(), parseInt(userInput) || 1000);
+        // 使用安全的延遲時間處理
+        const delay = parseInt(userInput) || 1000;
+        setTimeout(() => computerMove(), delay);
     }
 }
 
