@@ -1,4 +1,10 @@
-# 使用最新的 Alpine 版本以獲得較新的 musl libc
+# 使用最新的 Alpine 版本以獲得較新的 musl libc (1.2.6+)
+FROM alpine:3.19.1 as builder
+
+# 安裝並更新 musl libc
+RUN apk add --no-cache musl-dev gcc make
+
+# 設定基礎映像
 FROM nginx:alpine3.19.1
 
 # 維護者資訊
@@ -8,8 +14,15 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 # 安裝並更新必要套件
 RUN apk update && \
-    apk upgrade musl busybox openssl libxml2 expat libxslt curl && \
-    apk add --no-cache libxml2-dev expat-dev libxslt-dev openssl-dev curl-dev && \
+    apk upgrade musl musl-utils && \
+    apk add --no-cache \
+        libxml2-dev \
+        expat-dev \
+        libxslt-dev \
+        openssl-dev \
+        curl-dev \
+        libiconv \
+        libiconv-dev && \
     apk del perl perl-module-runtime && \
     # 創建非 root 使用者
     addgroup -S appgroup && \
@@ -44,7 +57,10 @@ RUN chown -R appuser:appgroup /usr/share/nginx/html && \
     chmod 644 /usr/lib/libxslt.so* && \
     chmod 644 /usr/lib/libssl.so* && \
     chmod 644 /usr/lib/libcurl.so* && \
+    chmod 644 /usr/lib/libiconv.so* && \
     chmod 755 /bin/busybox && \
+    # 設定 iconv 安全配置
+    echo "export MUSL_LOCPATH=/usr/share/i18n/locales/musl" >> /etc/profile.d/locale.sh && \
     touch /var/run/nginx.pid && \
     chown -R appuser:appgroup /var/run/nginx.pid && \
     rm -rf /var/cache/apk/* /tmp/*
