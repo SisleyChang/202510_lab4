@@ -1,5 +1,5 @@
-# 使用較新的 Alpine 版本
-FROM nginx:alpine3.19
+# 使用最新的 Alpine 版本以獲得較新的 musl libc
+FROM nginx:alpine3.19.1
 
 # 維護者資訊
 LABEL org.opencontainers.image.source="https://github.com/YOUR_USERNAME/YOUR_REPO"
@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 # 安裝並更新必要套件
 RUN apk update && \
-    apk upgrade busybox openssl libxml2 expat libxslt curl && \
+    apk upgrade musl busybox openssl libxml2 expat libxslt curl && \
     apk add --no-cache libxml2-dev expat-dev libxslt-dev openssl-dev curl-dev && \
     apk del perl perl-module-runtime && \
     # 創建非 root 使用者
