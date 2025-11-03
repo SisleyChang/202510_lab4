@@ -8,8 +8,8 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 # 安裝並更新必要套件，移除 perl 相關套件
 RUN apk update && \
-    apk upgrade libxml2 expat libxslt && \
-    apk add --no-cache libxml2-dev expat-dev libxslt-dev && \
+    apk upgrade openssl libxml2 expat libxslt && \
+    apk add --no-cache libxml2-dev expat-dev libxslt-dev openssl-dev && \
     apk del perl perl-module-runtime
 
 # 移除預設的 Nginx 網頁
@@ -39,5 +39,9 @@ RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html && \
     chmod 644 /usr/lib/libexpat.so* && \
     chmod 644 /usr/lib/libxslt.so* && \
+    chmod 644 /usr/lib/libssl.so* && \
+    # 設定 OpenSSL 安全配置
+    mkdir -p /etc/ssl/private && \
+    chmod 700 /etc/ssl/private && \
     # 移除不必要的檔案
     rm -rf /var/cache/apk/* /tmp/*
