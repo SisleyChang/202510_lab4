@@ -10,7 +10,10 @@ LABEL org.opencontainers.image.licenses="MIT"
 RUN apk update && \
     apk upgrade busybox openssl libxml2 expat libxslt curl && \
     apk add --no-cache libxml2-dev expat-dev libxslt-dev openssl-dev curl-dev && \
-    apk del perl perl-module-runtime
+    apk del perl perl-module-runtime && \
+    # 創建非 root 使用者
+    addgroup -S appgroup && \
+    adduser -S -G appgroup appuser
 
 # 移除預設的 Nginx 網頁
 RUN rm -rf /usr/share/nginx/html/*
@@ -35,13 +38,19 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 
 # 加強安全配置
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
+RUN chown -R appuser:appgroup /usr/share/nginx/html && \
+    chown -R appuser:appgroup /var/cache/nginx && \
+    chown -R appuser:appgroup /var/log/nginx && \
+    chown -R appuser:appgroup /etc/nginx/conf.d && \
     chmod -R 755 /usr/share/nginx/html && \
     chmod 644 /usr/lib/libexpat.so* && \
     chmod 644 /usr/lib/libxslt.so* && \
     chmod 644 /usr/lib/libssl.so* && \
     chmod 644 /usr/lib/libcurl.so* && \
-    # 設定 BusyBox 安全配置
     chmod 755 /bin/busybox && \
-    # 移除不必要的檔案
+    touch /var/run/nginx.pid && \
+    chown -R appuser:appgroup /var/run/nginx.pid && \
     rm -rf /var/cache/apk/* /tmp/*
+
+# 切換到非 root 使用者
+USER appuser
