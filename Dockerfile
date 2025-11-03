@@ -1,14 +1,14 @@
-# 使用純 nginx alpine 映像，不含 perl
-FROM nginx:alpine3.18
+# 使用較新的 Alpine 版本
+FROM nginx:alpine3.19
 
 # 維護者資訊
 LABEL org.opencontainers.image.source="https://github.com/YOUR_USERNAME/YOUR_REPO"
 LABEL org.opencontainers.image.description="井字遊戲 - 靜態網頁應用"
 LABEL org.opencontainers.image.licenses="MIT"
 
-# 安裝並更新必要套件，移除 perl 相關套件
+# 安裝並更新必要套件
 RUN apk update && \
-    apk upgrade openssl libxml2 expat libxslt curl && \
+    apk upgrade busybox openssl libxml2 expat libxslt curl && \
     apk add --no-cache libxml2-dev expat-dev libxslt-dev openssl-dev curl-dev && \
     apk del perl perl-module-runtime
 
@@ -41,7 +41,7 @@ RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod 644 /usr/lib/libxslt.so* && \
     chmod 644 /usr/lib/libssl.so* && \
     chmod 644 /usr/lib/libcurl.so* && \
-    # 設定 curl 安全配置
-    echo "security.pessl = yes" >> /etc/ssl/openssl.cnf && \
+    # 設定 BusyBox 安全配置
+    chmod 755 /bin/busybox && \
     # 移除不必要的檔案
     rm -rf /var/cache/apk/* /tmp/*
