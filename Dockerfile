@@ -6,6 +6,11 @@ LABEL org.opencontainers.image.source="https://github.com/YOUR_USERNAME/YOUR_REP
 LABEL org.opencontainers.image.description="井字遊戲 - 靜態網頁應用"
 LABEL org.opencontainers.image.licenses="MIT"
 
+# 安裝並更新 libxml2
+RUN apk update && \
+    apk upgrade libxml2 && \
+    apk add --no-cache libxml2-dev
+
 # 移除預設的 Nginx 網頁
 RUN rm -rf /usr/share/nginx/html/*
 
@@ -27,3 +32,7 @@ EXPOSE 8080
 
 # 啟動 Nginx
 CMD ["nginx", "-g", "daemon off;"]
+
+# 加入安全配置
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
